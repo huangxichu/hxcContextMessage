@@ -125,16 +125,16 @@ public class UserServiceImpl implements UserService {
         if(user != null){
             String password = user.getPassword();
             if(password.equals(userParam.getPassword())){
-                String token = this.createToKen(user);//更新.生成用户Token
+                return user;
             }else{
                 throw new ApplicationException(ResultEnum.PASSWORD_IS_ERROR);
             }
         }else{
             throw new ApplicationException(ResultEnum.USER_NOT_FIND);
         }
-        return null;
     }
     
+    @Override
     public String createToKen(UserInfo userInfo) {
         Integer id = userInfo.getId();
         String userTokenKey = String.format(Constant.USER_TOKEN_KEY, id.toString());
@@ -150,6 +150,33 @@ public class UserServiceImpl implements UserService {
         redisUtil.set(token, String.valueOf(id), Constant.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         redisUtil.set(userTokenKey, token, Constant.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         return token;
+    }
+    
+    @Override
+    public UserInfo getUserInfoByToken(String token) {
+        UserInfo userInfo = null;
+        Object o = redisUtil.get(token);
+        Integer id= o != null ? Integer.valueOf(o.toString()) : null;
+        logger.info("redis 获取 TOKEN："+token+" ，返回值：" + id);
+        if(!ObjectUtil.isNotBlank(id)){
+            logger.error(String.format("获取不到用户信息，Token：%s, associatorCode：%s", token, id));
+        }else{
+            try {
+                userInfo = userRepository.getOne(id);
+                if (null == userInfo) {
+                    logger.error(String.format("获取不到会员信息，Token：%s, userId：%s, userInfo： %s", token, id, userInfo));
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        if(null != userInfo){
+            //重置一下TOKEN过期时间
+            String userTokenKey = String.format(Constant.USER_TOKEN_KEY, id.toString());
+            redisUtil.set(token, String.valueOf(id), Constant.TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            redisUtil.set(userTokenKey, token, Constant.TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        }
+        return userInfo;
     }
     
     //查询User，单表，多条件

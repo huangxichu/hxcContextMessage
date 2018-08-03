@@ -21,4 +21,8 @@ public interface UserService {
     
     UserInfo login(UserInfo userParam, String salt)throws Exception ;
     
+    String createToKen(UserInfo userInfo);
+    
+    UserInfo getUserInfoByToken(String token);
+    
 }

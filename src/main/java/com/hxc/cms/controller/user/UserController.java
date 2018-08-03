@@ -2,13 +2,12 @@ package com.hxc.cms.controller.user;
 
 
 import com.hxc.cms.dto.Result;
+import com.hxc.cms.dto.UserLoginToken;
 import com.hxc.cms.model.UserInfo;
 import com.hxc.cms.service.user.UserService;
+import com.hxc.cms.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UserController {
@@ -22,7 +21,7 @@ public class UserController {
      * @param password
      * @return
      */
-    @GetMapping("/user/login")
+    @PutMapping("/user/login")
     public Result login(
             @RequestHeader(value = "salt",required = true) String salt,
             @RequestParam(value = "loginCode",required = true) String loginCode,
@@ -31,8 +30,13 @@ public class UserController {
         userParam.setLoginCode(loginCode);
         userParam.setPassword(password);
         UserInfo user = userService.login(userParam,salt);
-        
-        return null;
+        String token = userService.createToKen(user);
+        UserLoginToken uk = new UserLoginToken();
+        uk.setToken(token);
+        uk.setUserInfo(user);
+        return ResultUtil.success(uk);
     }
 
+    
+    
 }

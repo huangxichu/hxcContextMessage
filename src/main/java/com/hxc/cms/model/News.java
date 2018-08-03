@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "news", schema = "cms", catalog = "")
 public class News implements Serializable {
     @Id
     @GeneratedValue
