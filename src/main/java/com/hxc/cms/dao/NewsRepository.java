@@ -24,4 +24,9 @@ public interface NewsRepository extends JpaRepository<News,Integer> {
     @Transactional
     @Query(value="delete from com.hxc.cms.model.News  e where e.newCategoryId = :id ")
     int deleteByCategoryId(@Param("id")Integer id);
+
+    @Modifying
+    @Transactional
+    @Query(value="delete from com.hxc.cms.model.News  e where e.id in (:ids) ")
+    int deleteByIds(@Param("ids")List<Integer> ids);
 }
