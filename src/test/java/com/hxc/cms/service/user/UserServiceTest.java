@@ -22,10 +22,12 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
-    public void save() {
+    public void save() throws Exception {
         UserInfo user = new UserInfo();
-        user.setCompanyCode("0001");
         user.setEmpId(1);
+        user.setLoginCode("hxc");
+        user.setPassword("123456");
+        user.setCompanyCode("gwHvj2penyCpFW1j");
         UserInfo userInfo = this.userService.save(user);
     }
 

@@ -6,11 +6,11 @@ import com.hxc.cms.enums.ResultEnum;
 import com.hxc.cms.exception.ApplicationException;
 import com.hxc.cms.model.NewsCategory;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.news.NewsCategoryService;
 import com.hxc.cms.utils.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +25,23 @@ public class NewsCategoryServiceImpl implements NewsCategoryService {
     private NewsRepository newsRepository;
     
     @Override
+    public Page<NewsCategory> findCategorysByPage(NewsCategory newsCategoryParam, PageParam pageParam) {
+        Example<NewsCategory> example = Example.of(newsCategoryParam);
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                // 忽略字段。
+                .withIgnorePaths("id", "createTime","ide")
+                // 忽略大小写。
+                .withIgnoreCase()
+                // 忽略为空字段。
+                .withIgnoreNullValues();
+        // 携带 ExampleMatcher。
+        example = Example.of(newsCategoryParam, exampleMatcher);
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows()); //页码：前端从1开始，jpa从0开始，做个转换
+        return this.newsCategoryRepository.findAll(example,pageable);
+    }
+    
+    @Override
     public List<NewsCategory> findCategorys(NewsCategory newsCategoryParam) {
-
         Example<NewsCategory> example = Example.of(newsCategoryParam);
         ExampleMatcher exampleMatcher = ExampleMatcher.matching()
                 // 忽略字段。

@@ -5,10 +5,8 @@ import com.hxc.cms.annotation.CheckLogin;
 import com.hxc.cms.aspect.TokenAspect;
 import com.hxc.cms.dto.Result;
 import com.hxc.cms.model.Employee;
-import com.hxc.cms.model.Message;
 import com.hxc.cms.model.UserInfo;
 import com.hxc.cms.service.employee.EmployeeService;
-import com.hxc.cms.service.message.MessageService;
 import com.hxc.cms.service.user.UserService;
 import com.hxc.cms.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +24,20 @@ public class EmployeeController {
     private UserService userService;
    
     @CheckLogin
-    @GetMapping("/message")
-    public Result getMessage(HttpServletRequest request){
+    @GetMapping("/employees")
+    public Result getEmployees(HttpServletRequest request){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         Employee employeeParam = new Employee();
         employeeParam.setCompanyCode(user.getCompanyCode());
-        List<Employee> news = employeeService.findEmployees(employeeParam);
-        return ResultUtil.success(news);
+        List<Employee> employees = employeeService.findEmployees(employeeParam);
+        return ResultUtil.success(employees);
     }
     
     
     @CheckLogin
-    @PostMapping("/message/save")
-    public Result saveCategory(HttpServletRequest request,Employee employee){
+    @PostMapping("/employee/save")
+    public Result saveEmployee(HttpServletRequest request,Employee employee){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         employee.setCompanyCode(user.getCompanyCode());
@@ -48,21 +46,21 @@ public class EmployeeController {
     }
     
     @CheckLogin
-    @PutMapping("/news/update")
+    @PutMapping("/employee/update")
     public Result update(HttpServletRequest request,Employee employee){
         employeeService.update (employee);
         return ResultUtil.success(employee);
     }
     
     @CheckLogin
-    @DeleteMapping("/news/delete")
+    @DeleteMapping("/employee/delete")
     public Result delete(HttpServletRequest request,Employee employee){
         employeeService.delete(employee.getId());
         return ResultUtil.success(employee);
     }
     
     @CheckLogin
-    @DeleteMapping("/news/deletes")
+    @DeleteMapping("/employee/deletes")
     public Result deletes(HttpServletRequest request,List<Integer> ids){
         employeeService.deletes(ids);
         return ResultUtil.success(ids);

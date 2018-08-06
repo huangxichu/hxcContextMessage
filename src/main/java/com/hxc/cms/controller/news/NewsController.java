@@ -25,7 +25,7 @@ public class NewsController {
    
     @CheckLogin
     @GetMapping("/news")
-    public Result getCategory(HttpServletRequest request){
+    public Result getNews(HttpServletRequest request){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         News newsParam = new News();
@@ -37,7 +37,7 @@ public class NewsController {
     
     @CheckLogin
     @PostMapping("/news/save")
-    public Result saveCategory(HttpServletRequest request,News news){
+    public Result saveNews(HttpServletRequest request,News news){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         news.setCompanyCode(user.getCompanyCode());

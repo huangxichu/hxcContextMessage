@@ -24,7 +24,7 @@ public class MessageController {
     private UserService userService;
    
     @CheckLogin
-    @GetMapping("/message")
+    @GetMapping("/messages")
     public Result getMessage(HttpServletRequest request){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
@@ -37,7 +37,7 @@ public class MessageController {
     
     @CheckLogin
     @PostMapping("/message/save")
-    public Result saveCategory(HttpServletRequest request,Message message){
+    public Result saveMessage(HttpServletRequest request,Message message){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         message.setCompanyCode(user.getCompanyCode());
@@ -46,21 +46,21 @@ public class MessageController {
     }
     
     @CheckLogin
-    @PutMapping("/news/update")
+    @PutMapping("/message/update")
     public Result update(HttpServletRequest request,Message message){
         messageService.update (message);
         return ResultUtil.success(message);
     }
     
     @CheckLogin
-    @DeleteMapping("/news/delete")
+    @DeleteMapping("/message/delete")
     public Result delete(HttpServletRequest request,Message message){
         messageService.delete(message.getId());
         return ResultUtil.success(message);
     }
     
     @CheckLogin
-    @DeleteMapping("/news/deletes")
+    @DeleteMapping("/message/deletes")
     public Result deletes(HttpServletRequest request,List<Integer> ids){
         messageService.deletes(ids);
         return ResultUtil.success(ids);

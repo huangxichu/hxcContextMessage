@@ -9,6 +9,7 @@ public enum ResultEnum {
     USER_NOT_FIND("12","用户不存在"),
     TOKEN_ERROR_MESSAGE("1403","Bad or missing token!"),
     TOKEN_EXCEPTION_MESSAGE("1404","Bad or missing token!"),
+    USER_LOGIN_CODE_IS_EXITS("2001","账号已经存在!")
     ;
 
     private String code;

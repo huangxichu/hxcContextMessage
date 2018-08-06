@@ -9,10 +9,12 @@ import java.util.List;
 
 public interface UserService {
 
-    UserInfo save(UserInfo userInfo);
+    UserInfo save(UserInfo userInfo)throws Exception ;
 
     List<UserInfo> findAll();
-
+    
+    long count(UserInfo userParam);
+    
     Page<UserInfo> findUsersByPage(UserInfo userParam,PageParam pageParam);
 
     UserInfo getOne(UserInfo userParam)throws Exception;
@@ -24,5 +26,13 @@ public interface UserService {
     String createToKen(UserInfo userInfo);
     
     UserInfo getUserInfoByToken(String token);
+    
+    List<UserInfo> findUserInfoes(UserInfo userParam);
+    
+    void update(UserInfo userInfo);
+    
+    void delete(Integer id);
+    
+    void deletes(List<Integer> ids);
     
 }

@@ -2,25 +2,21 @@ package com.hxc.cms.service.user.impl;
 
 import com.hxc.cms.dao.UserRepository;
 import com.hxc.cms.enums.ResultEnum;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.exception.ApplicationException;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.CompanyParam;
 import com.hxc.cms.param.PageParam;
-import com.hxc.cms.param.UserParam;
 import com.hxc.cms.service.user.UserService;
-import com.hxc.cms.utils.Constant;
-import com.hxc.cms.utils.MD5Utils;
-import com.hxc.cms.utils.ObjectUtil;
-import com.hxc.cms.utils.RedisUtil;
+import com.hxc.cms.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.*;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,8 +32,18 @@ public class UserServiceImpl implements UserService {
     
     
     @Override
-    @Transient
-    public UserInfo save(UserInfo userInfo) {
+    @Transactional
+    public UserInfo save(UserInfo userInfo)throws Exception {
+        UserInfo userParam = new UserInfo();
+        userParam.setCompanyCode(userInfo.getCompanyCode());
+        userParam.setLoginCode(userInfo.getLoginCode());
+        long ct = this.count(userParam);
+        if(ct > 0){
+            throw new ApplicationException(ResultEnum.USER_LOGIN_CODE_IS_EXITS);
+        }
+        userInfo.setStatus(Status.ENABLE.getCode());
+        userInfo.setCreateTime(new Date());
+        userInfo.setPassword(EncryptUtils.encode(userInfo.getPassword()));
         return userRepository.save(userInfo);
     }
 
@@ -45,7 +51,23 @@ public class UserServiceImpl implements UserService {
     public List<UserInfo> findAll() {
         return userRepository.findAll();
     }
-
+    
+    
+    @Override
+    public long count(UserInfo userParam) {
+        Example<UserInfo> userExample = Example.of(userParam);
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                // 忽略字段。
+                .withIgnorePaths("id", "createTime","password","lastLoginTime")
+                // 忽略大小写。
+                .withIgnoreCase()
+                // 忽略为空字段。
+                .withIgnoreNullValues();
+        // 携带 ExampleMatcher。
+        userExample = Example.of(userParam, exampleMatcher);
+        return this.userRepository.count(userExample);
+    }
+    
     @Override
     public Page<UserInfo> findUsersByPage(UserInfo userParam,PageParam pageParam) {
         // 1.使用 Example。
@@ -177,6 +199,43 @@ public class UserServiceImpl implements UserService {
             redisUtil.set(userTokenKey, token, Constant.TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
         return userInfo;
+    }
+    
+    @Override
+    public List<UserInfo> findUserInfoes(UserInfo userParam) {
+        Example<UserInfo> example = Example.of(userParam);
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                // 忽略字段。
+                .withIgnorePaths("id", "createTime","password","lastLoginTime")
+                // 忽略大小写。
+                .withIgnoreCase()
+                // 忽略为空字段。
+                .withIgnoreNullValues();
+        // 携带 ExampleMatcher。
+        example = Example.of(userParam, exampleMatcher);
+        return this.userRepository.findAll(example);
+    }
+    
+    @Override
+    @Transactional
+    public void update(UserInfo userInfo) {
+        userRepository.save(userInfo);
+    }
+    
+    @Override
+    @Transactional
+    public void delete(Integer id) {
+        if(ObjectUtil.isNotBlank(id)){
+            this.userRepository.delete(id);
+        }
+    }
+    
+    @Override
+    @Transactional
+    public void deletes(List<Integer> ids) {
+        if(ObjectUtil.isNotBlank(ids)){
+            this.userRepository.deleteByIds(ids);
+        }
     }
     
     //查询User，单表，多条件
