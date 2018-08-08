@@ -51,13 +51,12 @@ public class NewsCategoryController {
         return ResultUtil.success(categories);
     }
     
-    @CheckLogin
+//    @CheckLogin
     @GetMapping("/news/categories")
-    public Result getCategory(HttpServletRequest request){
-        String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
-        UserInfo user = userService.getUserInfoByToken(token);
+    public Result getCategory(HttpServletRequest request,
+                              @RequestParam(value = "companyCode",required = true) String companyCode){
         NewsCategory newsCategoryParam = new NewsCategory();
-        newsCategoryParam.setCompanyCode(user.getCompanyCode());
+        newsCategoryParam.setCompanyCode(companyCode);
         List<NewsCategory> categories = newsCategoryService.findCategorys(newsCategoryParam);
         return ResultUtil.success(categories);
     }

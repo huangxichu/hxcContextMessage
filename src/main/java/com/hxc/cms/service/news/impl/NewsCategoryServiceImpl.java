@@ -86,7 +86,7 @@ public class NewsCategoryServiceImpl implements NewsCategoryService {
     @Transactional
     public void delete(Integer id) {
         if(ObjectUtil.isNotBlank(id)){
-            this.newsRepository.deleteByCategoryId(id);
+//            this.newsRepository.deleteByCategoryId(id);
             this.newsCategoryRepository.delete(id);
         }
     }
@@ -95,7 +95,7 @@ public class NewsCategoryServiceImpl implements NewsCategoryService {
     @Transactional
     public void deletes(List<Integer> ids) {
         if(ObjectUtil.isNotBlank(ids)){
-            this.newsRepository.deleteByCategoryIds(ids);
+//            this.newsRepository.deleteByCategoryIds(ids);
             this.newsCategoryRepository.deleteByIds(ids);
         }
     }

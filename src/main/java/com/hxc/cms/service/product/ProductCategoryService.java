@@ -20,4 +20,6 @@ public interface ProductCategoryService {
     
     void deletes(List<Integer> ids);
     
+    Page<ProductCategory> findCategorysByPage(ProductCategory productCategoryParam, PageParam pageParam);
+    
 }

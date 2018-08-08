@@ -13,7 +13,7 @@ public class ProductCategory implements Serializable {
     @Column(name = "ID")
     private Integer id;
     @Column(name = "NAME")
-    private Integer name;
+    private String name;
     @Column(name = "STATUS")
     private String status;
     @Column(name = "IDE")
@@ -31,15 +31,15 @@ public class ProductCategory implements Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
-
-    public Integer getName() {
+    
+    public String getName() {
         return name;
     }
-
-    public void setName(Integer name) {
+    
+    public void setName(String name) {
         this.name = name;
     }
-
+    
     public String getStatus() {
         return status;
     }

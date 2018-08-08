@@ -11,6 +11,9 @@ public enum ResultEnum {
     TOKEN_EXCEPTION_MESSAGE("1404","Bad or missing token!"),
     USER_LOGIN_CODE_IS_EXITS("2001","账号已经存在!"),
     USER_LOGIN_KEY_IS_EXPIRE("2002","秘钥过期!"),
+    IMG_NOT_EMPTY("3001","图片不能为空!"),
+    IMG_FORMAT_ERROR("3002","图片类型错误!"),
+    SAVE_IMG_ERROE("3003","保存图片失败!"),
     ;
 
     private String code;

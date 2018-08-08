@@ -6,10 +6,14 @@ import com.hxc.cms.aspect.TokenAspect;
 import com.hxc.cms.dto.Result;
 import com.hxc.cms.model.Product;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.product.ProductService;
 import com.hxc.cms.service.user.UserService;
+import com.hxc.cms.utils.Constant;
+import com.hxc.cms.utils.ObjectUtil;
 import com.hxc.cms.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +26,21 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     private UserService userService;
-   
+    
+    @CheckLogin
+    @GetMapping("/page/products")
+    public Result getProductsByPage(HttpServletRequest request,
+                                    @RequestParam(value = "page",required = true) Integer page,
+                                    @RequestParam(value = "rows",required = true) Integer rows){
+        String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
+        UserInfo user = userService.getUserInfoByToken(token);
+        Product productParam = new Product();
+        productParam.setCompanyCode(user.getCompanyCode());
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
+        Page<Product> products = productService.findProductsByPage(productParam,pageParam);
+        return ResultUtil.success(products);
+    }
+    
     @CheckLogin
     @GetMapping("/products")
     public Result getProducts(HttpServletRequest request){

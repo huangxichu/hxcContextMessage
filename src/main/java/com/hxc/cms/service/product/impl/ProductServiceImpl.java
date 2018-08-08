@@ -31,11 +31,12 @@ public class ProductServiceImpl implements ProductService {
                 .withIgnorePaths("id", "createTime")
                 // 忽略大小写。
                 .withIgnoreCase()
+                .withMatcher("productName", ExampleMatcher.GenericPropertyMatchers.startsWith()) //采用“开始匹配”的方式查询
                 // 忽略为空字段。
                 .withIgnoreNullValues();
         // 携带 ExampleMatcher。
         example = Example.of(productParam, exampleMatcher);
-        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows()); //页码：前端从1开始，jpa从0开始，做个转换
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.DESC,"createTime"); //页码：前端从1开始，jpa从0开始，做个转换
         return productRepository.findAll(example,pageable);
     }
     

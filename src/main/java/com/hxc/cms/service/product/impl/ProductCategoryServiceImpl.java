@@ -1,6 +1,7 @@
 package com.hxc.cms.service.product.impl;
 
 import com.hxc.cms.dao.ProductCategoryRepository;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.model.ProductCategory;
 import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.product.ProductCategoryService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service("productCategoryService")
@@ -17,6 +19,23 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
 
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
+    
+    @Override
+    public Page<ProductCategory> findCategorysByPage(ProductCategory productCategoryParam, PageParam pageParam) {
+        Example<ProductCategory> example = Example.of(productCategoryParam);
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                // 忽略字段。
+                .withIgnorePaths("id", "createTime","ide")
+                // 忽略大小写。
+                .withIgnoreCase()
+                // 忽略为空字段。
+                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith()) //姓名采用“开始匹配”的方式查询
+                .withIgnoreNullValues();
+        // 携带 ExampleMatcher。
+        example = Example.of(productCategoryParam, exampleMatcher);
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.ASC,"ide","createTime"); //页码：前端从1开始，jpa从0开始，做个转换
+        return this.productCategoryRepository.findAll(example,pageable);
+    }
     
     @Override
     public Page<ProductCategory> findProductCategorysByPage(ProductCategory productCategoryParam, PageParam pageParam) {
@@ -30,7 +49,7 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
                 .withIgnoreNullValues();
         // 携带 ExampleMatcher。
         example = Example.of(productCategoryParam, exampleMatcher);
-        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows()); //页码：前端从1开始，jpa从0开始，做个转换
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.ASC,"ide","createTime"); //页码：前端从1开始，jpa从0开始，做个转换
         return this.productCategoryRepository.findAll(example,pageable);
     }
     
@@ -52,7 +71,19 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
     @Override
     @Transactional
     public void save(ProductCategory productCategory) {
-        this.productCategoryRepository.save(productCategory);
+        if(!ObjectUtil.isNotBlank(productCategory.getId())){
+            productCategory.setStatus(Status.ENABLE.getCode());
+            productCategory.setCreateTime(new Date());
+            this.productCategoryRepository.save(productCategory);
+        }else{
+            ProductCategory category = this.productCategoryRepository.getOne(productCategory.getId());
+            if(category != null){
+                category.setStatus(productCategory.getStatus());
+                category.setName(productCategory.getName());
+                category.setIde(productCategory.getIde());
+                this.productCategoryRepository.save(category);
+            }
+        }
     }
     
     @Override
@@ -76,4 +107,6 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
             this.productCategoryRepository.deleteByIds(ids);
         }
     }
+    
+
 }
