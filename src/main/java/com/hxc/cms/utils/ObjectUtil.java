@@ -24,8 +24,8 @@ public class ObjectUtil {
         return list != null && list.size() > 0;
     }
     
-    public static boolean isNotObject(Object value) {
-        return value != null;
+    public static Integer numberFormat(Integer value,Integer defaultValue) {
+        return value == null ? defaultValue : value;
     }
     
     /**

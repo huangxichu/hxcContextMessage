@@ -15,8 +15,9 @@ import java.util.List;
 public interface NewsCategoryRepository extends JpaRepository<NewsCategory,Integer> {
     
     
+
+    
     @Modifying
-    @Transactional
     @Query(value="delete from com.hxc.cms.model.NewsCategory  e where e.id in (:ids) ")
     int deleteByIds(@Param("ids")List<Integer> ids);
 }

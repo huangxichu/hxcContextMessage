@@ -11,4 +11,8 @@ public class Constant {
     
     public static final String USER_TOKEN_KEY = "HXC_CMS_USERTokenKey_%s";
     
+    public static final Integer ROWS = 10;
+    
+    public static final Integer PAGES = 1;
+    
 }
