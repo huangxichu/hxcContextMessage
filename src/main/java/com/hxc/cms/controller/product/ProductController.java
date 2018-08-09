@@ -31,10 +31,26 @@ public class ProductController {
     @GetMapping("/page/products")
     public Result getProductsByPage(HttpServletRequest request,
                                     @RequestParam(value = "page",required = true) Integer page,
-                                    @RequestParam(value = "rows",required = true) Integer rows){
+                                    @RequestParam(value = "rows",required = true) Integer rows,
+                                    @RequestParam(value = "productCategoryId",required = false) Integer productCategoryId,
+                                    @RequestParam(value = "productName",required = false) String productName,
+                                    @RequestParam(value = "isHot",required = false) String isHot,
+                                    @RequestParam(value = "status",required = false) String status){
         String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
         UserInfo user = userService.getUserInfoByToken(token);
         Product productParam = new Product();
+        if(ObjectUtil.isNotBlank(productCategoryId)){
+            productParam.setProductCategoryId(productCategoryId);
+        }
+        if(ObjectUtil.isNotBlank(productName)){
+            productParam.setProductName(productName);
+        }
+        if(ObjectUtil.isNotBlank(isHot)){
+            productParam.setIsHot(isHot);
+        }
+        if(ObjectUtil.isNotBlank(status)){
+            productParam.setStatus(status);
+        }
         productParam.setCompanyCode(user.getCompanyCode());
         PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
         Page<Product> products = productService.findProductsByPage(productParam,pageParam);

@@ -54,9 +54,13 @@ public class NewsCategoryController {
 //    @CheckLogin
     @GetMapping("/news/categories")
     public Result getCategory(HttpServletRequest request,
-                              @RequestParam(value = "companyCode",required = true) String companyCode){
+                              @RequestParam(value = "companyCode",required = true) String companyCode,
+                              @RequestParam(value = "status",required = false) String status){
         NewsCategory newsCategoryParam = new NewsCategory();
         newsCategoryParam.setCompanyCode(companyCode);
+        if(ObjectUtil.isNotBlank(status)){
+            newsCategoryParam.setStatus(status);
+        }
         List<NewsCategory> categories = newsCategoryService.findCategorys(newsCategoryParam);
         return ResultUtil.success(categories);
     }

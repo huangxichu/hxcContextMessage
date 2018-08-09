@@ -51,13 +51,15 @@ public class ProductCategoryController {
         return ResultUtil.success(categories);
     }
     
-    @CheckLogin
     @GetMapping("/product/categories")
-    public Result getCategory(HttpServletRequest request){
-        String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
-        UserInfo user = userService.getUserInfoByToken(token);
+    public Result getCategory(HttpServletRequest request,
+                              @RequestParam(value = "companyCode",required = true) String companyCode,
+                              @RequestParam(value = "status",required = false) String status){
         ProductCategory productCategoryParam = new ProductCategory();
-        productCategoryParam.setCompanyCode(user.getCompanyCode());
+        productCategoryParam.setCompanyCode(companyCode);
+        if(ObjectUtil.isNotBlank(status)){
+            productCategoryParam.setStatus(status);
+        }
         List<ProductCategory> categories = productCategoryService.findCategorys(productCategoryParam);
         return ResultUtil.success(categories);
     }

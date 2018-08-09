@@ -6,10 +6,14 @@ import com.hxc.cms.aspect.TokenAspect;
 import com.hxc.cms.dto.Result;
 import com.hxc.cms.model.News;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.news.NewsService;
 import com.hxc.cms.service.user.UserService;
+import com.hxc.cms.utils.Constant;
+import com.hxc.cms.utils.ObjectUtil;
 import com.hxc.cms.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +26,42 @@ public class NewsController {
     private NewsService newsService;
     @Autowired
     private UserService userService;
-   
+    
+    @CheckLogin
+    @GetMapping("/news/page")
+    public Result getPageCategory(HttpServletRequest request,
+                                  @RequestParam(value = "page",required = true) Integer page,
+                                  @RequestParam(value = "rows",required = true) Integer rows,
+                                  @RequestParam(value = "newCategoryId",required = false) Integer newCategoryId,
+                                  @RequestParam(value = "title",required = false) String title,
+                                  @RequestParam(value = "isOriginal",required = false) String isOriginal,
+                                  @RequestParam(value = "sources",required = false) String sources,
+                                  @RequestParam(value = "status",required = false) String status
+    ){
+        String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
+        UserInfo user = userService.getUserInfoByToken(token);
+        News newsParam = new News();
+        newsParam.setCompanyCode(user.getCompanyCode());
+        if(ObjectUtil.isNotBlank(newCategoryId)){
+            newsParam.setNewCategoryId(newCategoryId);
+        }
+        if(ObjectUtil.isNotBlank(title)){
+            newsParam.setTitle(title);
+        }
+        if(ObjectUtil.isNotBlank(isOriginal)){
+            newsParam.setIsOriginal(isOriginal);
+        }
+        if(ObjectUtil.isNotBlank(sources)){
+            newsParam.setSources(sources);
+        }
+        if(ObjectUtil.isNotBlank(status)){
+            newsParam.setStatus(status);
+        }
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
+        Page<News> categories = newsService.findNewsByPage(newsParam,pageParam);
+        return ResultUtil.success(categories);
+    }
+    
     @CheckLogin
     @GetMapping("/news")
     public Result getNews(HttpServletRequest request){

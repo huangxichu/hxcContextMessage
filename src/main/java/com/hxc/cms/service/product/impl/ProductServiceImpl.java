@@ -1,6 +1,7 @@
 package com.hxc.cms.service.product.impl;
 
 import com.hxc.cms.dao.ProductRepository;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.model.Product;
 import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.product.ProductService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service("productService")
@@ -58,7 +60,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void save(Product product) {
-        this.productRepository.save(product);
+        if(!ObjectUtil.isNotBlank(product.getId())){
+            if(!ObjectUtil.isNotBlank(product.getStatus())){
+                product.setStatus(Status.ENABLE.getCode());
+            }
+            product.setCreateTime(new Date());
+            product.setUpdateTime(new Date());
+            this.productRepository.save(product);
+        }else{
+            Product _product = this.productRepository.getOne(product.getId());
+            if(_product != null){
+                _product.setProductCategoryId(product.getProductCategoryId());
+                _product.setStatus(product.getStatus());
+                _product.setIsHot(product.getIsHot());
+                _product.setPic(product.getPic());
+                _product.setProductInfo(product.getProductInfo());
+                _product.setProductName(product.getProductName());
+                this.productRepository.save(_product);
+            }
+        }
     }
     
     @Override
