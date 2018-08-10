@@ -30,7 +30,7 @@ public class MessageController {
     
     @CheckLogin
     @GetMapping("/message/page")
-    public Result getDepartmentes(HttpServletRequest request,
+    public Result getMessages(HttpServletRequest request,
                                   @RequestParam(value = "page",required = true) Integer page,
                                   @RequestParam(value = "rows",required = true) Integer rows,
                                   @RequestParam(value = "relName",required = false) String relName,

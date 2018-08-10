@@ -1,5 +1,7 @@
 package com.hxc.cms.service.user;
 
+import com.hxc.cms.dto.PageResult;
+import com.hxc.cms.model.Employee;
 import com.hxc.cms.model.UserInfo;
 import com.hxc.cms.param.PageParam;
 import com.hxc.cms.param.UserParam;
@@ -34,5 +36,6 @@ public interface UserService {
     void delete(Integer id);
     
     void deletes(List<Integer> ids);
-    
+
+    PageResult<UserInfo> findAll(UserInfo userParams, Employee employeeParams, PageParam pageParam);
 }

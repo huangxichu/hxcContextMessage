@@ -4,4 +4,4 @@ server:
 img:
   location: D:/file
   path: /mg/img
-  url: http://172.16.10.100:8080/document
+  url: http://192.168.0.104:8080/document

@@ -1,7 +1,11 @@
 package com.hxc.cms.service.user;
 
+import com.hxc.cms.model.Employee;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.PageParam;
 import com.hxc.cms.param.UserParam;
+import com.hxc.cms.utils.Constant;
+import com.hxc.cms.utils.ObjectUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -24,10 +28,13 @@ public class UserServiceTest {
     @Test
     public void save() throws Exception {
         UserInfo user = new UserInfo();
-        user.setEmpId(1);
-        user.setLoginCode("hxc");
+//        user.setEmpId(1);
+        Employee employee = new Employee();
+        employee.setId(1);
+        user.setLoginCode("hxc2");
         user.setPassword("123456");
         user.setCompanyCode("gwHvj2penyCpFW1j");
+        user.setEmployee(employee);
         UserInfo userInfo = this.userService.save(user);
     }
 
@@ -42,8 +49,17 @@ public class UserServiceTest {
         }
     }
 
+
+
+
     @Test
     public void findAll() {
+        UserInfo userParam = new UserInfo();
+        userParam.setLoginCode("hxc");
+        Employee employeeParam = new Employee();
+        employeeParam.setRelName("黄细初");
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(1, Constant.PAGES),ObjectUtil.numberFormat(10,Constant.ROWS));
+        logger.info("users={}",this.userService.findAll(userParam,employeeParam,pageParam).toString());
     }
 
     @Test

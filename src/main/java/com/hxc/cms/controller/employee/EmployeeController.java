@@ -29,7 +29,7 @@ public class EmployeeController {
     
     @CheckLogin
     @GetMapping("/employee/page")
-    public Result getDepartmentes(HttpServletRequest request,
+    public Result getEmployees(HttpServletRequest request,
                                   @RequestParam(value = "page",required = true) Integer page,
                                   @RequestParam(value = "rows",required = true) Integer rows,
                                   @RequestParam(value = "relName",required = false) String relName,

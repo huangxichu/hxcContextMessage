@@ -3,17 +3,18 @@ package com.hxc.cms.controller.user;
 
 import com.hxc.cms.annotation.CheckLogin;
 import com.hxc.cms.aspect.TokenAspect;
+import com.hxc.cms.dto.PageResult;
 import com.hxc.cms.dto.Result;
 import com.hxc.cms.dto.UserLoginToken;
 import com.hxc.cms.enums.ResultEnum;
 import com.hxc.cms.exception.ApplicationException;
+import com.hxc.cms.model.Employee;
 import com.hxc.cms.model.UserInfo;
+import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.user.UserService;
-import com.hxc.cms.utils.Base64Utils;
-import com.hxc.cms.utils.RSAUtils;
-import com.hxc.cms.utils.RedisUtil;
-import com.hxc.cms.utils.ResultUtil;
+import com.hxc.cms.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,8 +79,40 @@ public class UserController {
         uk.setUserInfo(user);
         return ResultUtil.success(uk);
     }
-    
-    
+
+
+    @CheckLogin
+    @GetMapping("/user/page")
+    public Result getUsers(HttpServletRequest request,
+                                  @RequestParam(value = "page",required = true) Integer page,
+                                  @RequestParam(value = "rows",required = true) Integer rows,
+                                  @RequestParam(value = "relName",required = false) String relName,
+                                  @RequestParam(value = "phone",required = false) String phone,
+                                  @RequestParam(value = "sex",required = false) String sex,
+                                  @RequestParam(value = "status",required = false) String status
+    ){
+        String token = request.getHeader(TokenAspect.TOKEN_ATTRIBUTE_NAME);
+        UserInfo user = userService.getUserInfoByToken(token);
+        UserInfo userParam = new UserInfo();
+        userParam.setCompanyCode(user.getCompanyCode());
+        if(ObjectUtil.isNotBlank(status)){
+            userParam.setStatus(status);
+        }
+        Employee employeeParam = new Employee();
+        if(ObjectUtil.isNotBlank(relName)){
+            employeeParam.setRelName(relName);
+        }
+        if(ObjectUtil.isNotBlank(sex)){
+            employeeParam.setSex(sex);
+        }
+        if(ObjectUtil.isNotBlank(phone)){
+            employeeParam.setPhone(phone);
+        }
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
+        PageResult<UserInfo> userInfoPage = userService.findAll(userParam,employeeParam,pageParam);
+        return ResultUtil.success(userInfoPage);
+    }
+
     @CheckLogin
     @GetMapping("/users")
     public Result getUsers(HttpServletRequest request){

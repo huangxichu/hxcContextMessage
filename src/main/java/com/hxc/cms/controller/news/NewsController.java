@@ -29,7 +29,7 @@ public class NewsController {
     
     @CheckLogin
     @GetMapping("/news/page")
-    public Result getPageCategory(HttpServletRequest request,
+    public Result getPageNews(HttpServletRequest request,
                                   @RequestParam(value = "page",required = true) Integer page,
                                   @RequestParam(value = "rows",required = true) Integer rows,
                                   @RequestParam(value = "newCategoryId",required = false) Integer newCategoryId,

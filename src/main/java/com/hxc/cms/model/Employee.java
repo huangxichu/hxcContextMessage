@@ -1,5 +1,7 @@
 package com.hxc.cms.model;
 
+import com.hxc.cms.utils.ObjectUtil;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -119,6 +121,24 @@ public class Employee implements Serializable {
 
     public void setCompanyCode(String companyCode) {
         this.companyCode = companyCode;
+    }
+
+    public static Employee copy(Employee employee) {
+        Employee e = null;
+        if(ObjectUtil.isNotBlank(employee)){
+            e = new Employee();
+            e.setId(employee.getId());
+            e.setRelName(employee.getRelName());
+            e.setCompanyCode(employee.getCompanyCode());
+            e.setPhone(employee.getPhone());
+            e.setSex(employee.getSex());
+            e.setStatus(employee.getStatus());
+            e.setAdress(employee.getAdress());
+            e.setCreateTime(employee.getCreateTime());
+            e.setIdCard(employee.getIdCard());
+            e.setCreateTime(employee.getCreateTime());
+        }
+        return e;
     }
 
     @Override

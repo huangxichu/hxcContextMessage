@@ -1,8 +1,12 @@
 package com.hxc.cms.model;
 
+import com.hxc.cms.utils.ObjectUtil;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -13,8 +17,8 @@ public class UserInfo implements Serializable {
     @GeneratedValue
     @Column(name = "ID")
     private Integer id;
-    @Column(name = "EMP_ID")
-    private Integer empId;
+//    @Column(name = "EMP_ID")
+//    private Integer empId;
     @Column(name = "LOGIN_CODE")
     private String loginCode;
     @Column(name = "PASSWORD")
@@ -29,6 +33,11 @@ public class UserInfo implements Serializable {
     private Date createTime;
     @Column(name = "COMPANY_CODE")
     private String companyCode;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "EMP_ID")
+    private Employee employee;
+    @Transient
+    private Integer empId;
 
     public Integer getId() {
         return id;
@@ -102,13 +111,55 @@ public class UserInfo implements Serializable {
         this.companyCode = companyCode;
     }
 
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
+
+    public static UserInfo copy(UserInfo userInfo){
+        UserInfo u = null;
+        if(ObjectUtil.isNotBlank(userInfo)){
+            u = new UserInfo();
+            u.setId(userInfo.getId());
+            u.setCompanyCode(userInfo.getCompanyCode());
+            u.setLoginCode(userInfo.getLoginCode());
+            u.setPassword(userInfo.getPassword());
+            u.setStatus(userInfo.getStatus());
+            u.setCreateTime(userInfo.getCreateTime());
+            u.setLastLoginIp(userInfo.getLastLoginIp());
+            u.setLastLoginTime(userInfo.getLastLoginTime());
+            Employee employee = Employee.copy(userInfo.getEmployee());
+            if(employee != null){
+                u.setEmpId(employee.getId());
+                u.setEmployee(employee);
+            }
+        }
+        return u;
+    }
+
+    public static List<UserInfo> copy(List<UserInfo> userInfos){
+        List<UserInfo> list = new ArrayList<>();
+        if(ObjectUtil.isNotBlank(userInfos)){
+            for(UserInfo userInfo : userInfos){
+                UserInfo u = UserInfo.copy(userInfo);
+                if(u != null){
+                    list.add(u);
+                }
+            }
+        }
+        return list;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserInfo userInfo = (UserInfo) o;
         return id == userInfo.id &&
-                Objects.equals(empId, userInfo.empId) &&
+                Objects.equals(employee, userInfo.employee) &&
                 Objects.equals(loginCode, userInfo.loginCode) &&
                 Objects.equals(password, userInfo.password) &&
                 Objects.equals(lastLoginTime, userInfo.lastLoginTime) &&
@@ -121,14 +172,14 @@ public class UserInfo implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, empId, loginCode, password, lastLoginTime, lastLoginIp, status, createTime, companyCode);
+        return Objects.hash(id,employee, loginCode, password, lastLoginTime, lastLoginIp, status, createTime, companyCode);
     }
     
     @Override
     public String toString() {
         return "UserInfo{" +
                 "id=" + id +
-                ", empId=" + empId +
+                ", employee=" + employee +
                 ", loginCode='" + loginCode + '\'' +
                 ", password='" + password + '\'' +
                 ", lastLoginTime=" + lastLoginTime +

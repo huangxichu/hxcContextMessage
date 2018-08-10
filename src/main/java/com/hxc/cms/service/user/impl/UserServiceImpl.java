@@ -1,11 +1,12 @@
 package com.hxc.cms.service.user.impl;
 
 import com.hxc.cms.dao.UserRepository;
+import com.hxc.cms.dto.PageResult;
 import com.hxc.cms.enums.ResultEnum;
 import com.hxc.cms.enums.Status;
 import com.hxc.cms.exception.ApplicationException;
+import com.hxc.cms.model.Employee;
 import com.hxc.cms.model.UserInfo;
-import com.hxc.cms.param.CompanyParam;
 import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.user.UserService;
 import com.hxc.cms.utils.*;
@@ -13,9 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -35,16 +39,29 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserInfo save(UserInfo userInfo)throws Exception {
         UserInfo userParam = new UserInfo();
-        userParam.setCompanyCode(userInfo.getCompanyCode());
-        userParam.setLoginCode(userInfo.getLoginCode());
-        long ct = this.count(userParam);
-        if(ct > 0){
-            throw new ApplicationException(ResultEnum.USER_LOGIN_CODE_IS_EXITS);
+        if(!ObjectUtil.isNotBlank(userInfo.getId())){
+            userParam.setCompanyCode(userInfo.getCompanyCode());
+            userParam.setLoginCode(userInfo.getLoginCode());
+            long ct = this.count(userParam);
+            if(ct > 0){
+                throw new ApplicationException(ResultEnum.USER_LOGIN_CODE_IS_EXITS);
+            }
+            userInfo.setStatus(Status.ENABLE.getCode());
+            userInfo.setCreateTime(new Date());
+            userInfo.setPassword(EncryptUtils.encode(userInfo.getPassword()));
+            return userRepository.save(userInfo);
+        }else{
+            UserInfo _old = this.userRepository.getOne(userInfo.getId());
+            if(_old != null){
+                Employee employee = new Employee();
+                employee.setId(userInfo.getEmployee().getId());
+                _old.setEmployee(employee);
+                _old.setStatus(userInfo.getStatus());
+                return userRepository.save(userInfo);
+            }else{
+                throw new ApplicationException(ResultEnum.USER_NOT_FIND);
+            }
         }
-        userInfo.setStatus(Status.ENABLE.getCode());
-        userInfo.setCreateTime(new Date());
-        userInfo.setPassword(EncryptUtils.encode(userInfo.getPassword()));
-        return userRepository.save(userInfo);
     }
 
     @Override
@@ -237,77 +254,55 @@ public class UserServiceImpl implements UserService {
             this.userRepository.deleteByIds(ids);
         }
     }
-    
-    //查询User，单表，多条件
-//    @Override
-//    public List<User> findAll(int pageNum, int pageSize, User user) {
-//        Pageable pageable = new PageRequest(pageNum, pageSize);
-//        List<User> uList = userRepository.findAll(new Specification<User>() {
-//            @Override
-//            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-//                List<Predicate> predicates = new ArrayList<>();
-//                if (user.getUserId() != null && !user.getUserId().equals("")) {
-//                    predicates.add(cb.like(root.get("userId").as(String.class), "%" + user.getUserId() + "%"));
-//                }
-//                if (user.getUserName() != null && !user.getUserName().equals("")) {
-//                    predicates.add(cb.like(root.get("userName").as(String.class), "%" + user.getUserName() + "%"));
-//                }
-//                if (user.getGender() != null && !user.getGender().equals("")) {
-//                    predicates.add(cb.like(root.get("gender").as(String.class), "%" + user.getGender() + "%"));
-//                }
-//                if (user.getAge() != null && !user.getAge().equals("")) {
-//                    predicates.add(cb.like(root.get("age").as(String.class), "%" + user.getAge() + "%"));
-//                }
-//                Predicate[] pre = new Predicate[predicates.size()];
-//                criteriaQuery.where(predicates.toArray(pre));
-//                return cb.and(predicates.toArray(pre));
-//            }
-//        }, pageable);
-//
-//        return uList;
-//    }
+
 
     //查询User，多表，多条件
-//    @Override
-//    public List<User> findAll(int pageNum, int pageSize, Params params) {
-//        Pageable pageable = new PageRequest(pageNum, pageSize);
-//        List<User> uList = userRepository.findAll(new Specification<User>() {
-//            @Override
-//            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-//                List<Predicate> list = new ArrayList<>();
-//                //根据userId 查询user
-//                if (ObjectUtil.isNotBlank(params.getUserId())) {
-//                    list.add(cb.equal(root.get("userId").as(String.class), params.getUserId()));
-//                }
-//                //根据userName 模糊查询user
-//                if (ObjectUtil.isNotBlank(params.getUserName())) {
-//                    list.add(cb.like(root.get("userName").as(String.class), "%" + params.getUserName() + "%"));
-//                }
-//                //根据gender 查询user
-//                if (ObjectUtil.isNotBlank(params.getGender())) {
-//                    list.add(cb.equal(root.get("gender").as(String.class), params.getGender()));
-//                }
-//                //根据age>? 查询user
-//                if (ObjectUtil.isNotBlank(params.getAge())) {
-//                    list.add(cb.gt(root.get("age").as(Integer.class), Integer.valueOf(params.getAge())));
-//                }
-//                //根据gradeName 查询user
-//                if (ObjectUtil.isNotBlank(params.getGradeName())) {
-//                    Join<Grade, User> join = root.join("grade", JoinType.LEFT);
-//                    list.add(cb.equal(join.get("gradeName"), params.getGradeName()));
-//                }
-//                //根据schoolName 查询user
-//                if (ObjectUtil.isNotBlank(params.getSchoolName())) {
-//                    Join<School, User> join = root.join("grade", JoinType.LEFT);
-//                    list.add(cb.equal(join.get("school").get("schoolName"), params.getSchoolName()));
-//                }
-//                Predicate[] pre = new Predicate[list.size()];
-//                criteriaQuery.where(list.toArray(pre));
-//                return cb.and(list.toArray(pre));
-//            }
-//        }, pageable);
-//
-//        return uList;
-//    }
+    @Override
+    public PageResult<UserInfo> findAll(UserInfo userParams, Employee employeeParams, PageParam pageParam) {
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.DESC,"createTime"); //页码：前端从1开始，jpa从0开始，做个转换
+        Page<UserInfo> userInfoPage = userRepository.findAll(new Specification<UserInfo>() {
+            @Override
+            public Predicate toPredicate(Root<UserInfo> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
+                List<Predicate> list = new ArrayList<>();
+                //根据userName 模糊查询user
+                if (ObjectUtil.isNotBlank(userParams.getLoginCode())) {
+                    list.add(cb.like(root.get("loginCode").as(String.class), "%" + userParams.getLoginCode() + "%"));
+                }
+                //根据status 查询user
+                if (ObjectUtil.isNotBlank(userParams.getStatus())) {
+                    list.add(cb.equal(root.get("status").as(String.class), userParams.getStatus()));
+                }
+                //根据gender 查询user
+                if (ObjectUtil.isNotBlank(userParams.getCompanyCode())) {
+                    list.add(cb.equal(root.get("companyCode").as(String.class), userParams.getCompanyCode()));
+                }
+                //根据relName 查询user
+                if (ObjectUtil.isNotBlank(employeeParams.getRelName()) || ObjectUtil.isNotBlank(employeeParams.getPhone())
+                        || ObjectUtil.isNotBlank(employeeParams.getSex())) {
+                    Join<UserInfo,Employee> join = root.join("employee", JoinType.LEFT);
+                    if(ObjectUtil.isNotBlank(employeeParams.getRelName())){
+                        list.add(cb.like(join.get("relName"), "%" +employeeParams.getRelName()+"%"));
+                    }
+                    if(ObjectUtil.isNotBlank(employeeParams.getPhone())){
+                        list.add(cb.like(join.get("phone"), "%" +employeeParams.getPhone()+"%"));
+                    }
+                    if(ObjectUtil.isNotBlank(employeeParams.getSex())){
+                        list.add(cb.equal(join.get("sex"), employeeParams.getSex()));
+                    }
+                }
+                Predicate[] pre = new Predicate[list.size()];
+                criteriaQuery.where(list.toArray(pre));
+                return cb.and(list.toArray(pre));
+            }
+        }, pageable);
+        PageResult<UserInfo> pageResult = new PageResult<>();
+        List<UserInfo> userInfos = userInfoPage.getContent();
+        if(ObjectUtil.isNotBlank(userInfos)){
+            pageResult.setTotalElements(userInfoPage.getTotalElements());
+            pageResult.setTotalPages(userInfoPage.getTotalPages());
+            pageResult.setContent(UserInfo.copy(userInfos));
+        }
+        return pageResult;
+    }
 
 }
