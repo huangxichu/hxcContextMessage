@@ -1,6 +1,8 @@
 package com.hxc.cms.service.employee.impl;
 
 import com.hxc.cms.dao.EmployeeRepository;
+import com.hxc.cms.enums.Status;
+import com.hxc.cms.model.Department;
 import com.hxc.cms.model.Employee;
 import com.hxc.cms.model.News;
 import com.hxc.cms.param.PageParam;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service("employeeService")
@@ -28,11 +31,13 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .withIgnorePaths("id", "createTime","updateTime")
                 // 忽略大小写。
                 .withIgnoreCase()
+                .withMatcher("relName", ExampleMatcher.GenericPropertyMatchers.startsWith()) //采用“开始匹配”的方式查询
+                .withMatcher("phone", ExampleMatcher.GenericPropertyMatchers.startsWith()) //采用“开始匹配”的方式查询
                 // 忽略为空字段。
                 .withIgnoreNullValues();
         // 携带 ExampleMatcher。
         example = Example.of(employeeParam, exampleMatcher);
-        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows()); //页码：前端从1开始，jpa从0开始，做个转换
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.DESC,"createTime"); //页码：前端从1开始，jpa从0开始，做个转换
         return this.employeeRepository.findAll(example,pageable);
     }
     
@@ -54,7 +59,24 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public void save(Employee employee) {
-        this.employeeRepository.save(employee);
+        if(!ObjectUtil.isNotBlank(employee.getId())){
+            if(!ObjectUtil.isNotBlank(employee.getStatus())){
+                employee.setStatus(Status.ENABLE.getCode());
+            }
+            employee.setCreateTime(new Date());
+            this.employeeRepository.save(employee);
+        }else{
+            Employee _old = this.employeeRepository.getOne(employee.getId());
+            if(_old != null){
+                _old.setRelName(employee.getRelName());
+                _old.setAdress(employee.getAdress());
+                _old.setPhone(employee.getPhone());
+                _old.setIdCard(employee.getIdCard());
+                _old.setSex(employee.getSex());
+                _old.setStatus(employee.getStatus());
+                this.employeeRepository.save(_old);
+            }
+        }
     }
 
     @Override

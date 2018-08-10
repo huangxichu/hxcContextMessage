@@ -12,8 +12,8 @@ public class Employee implements Serializable {
     @GeneratedValue
     @Column(name = "ID")
     private Integer id;
-    @Column(name = "COMPANY_ID")
-    private Integer companyId;
+//    @Column(name = "COMPANY_ID")
+//    private Integer companyId;
     @Column(name = "DEPT_ID")
     private Integer deptId;
     @Column(name = "REL_NAME")
@@ -41,13 +41,13 @@ public class Employee implements Serializable {
         this.id = id;
     }
 
-    public Integer getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Integer companyId) {
-        this.companyId = companyId;
-    }
+//    public Integer getCompanyId() {
+//        return companyId;
+//    }
+//
+//    public void setCompanyId(Integer companyId) {
+//        this.companyId = companyId;
+//    }
 
     public Integer getDeptId() {
         return deptId;
@@ -127,7 +127,7 @@ public class Employee implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Employee employee = (Employee) o;
         return id == employee.id &&
-                Objects.equals(companyId, employee.companyId) &&
+//                Objects.equals(companyId, employee.companyId) &&
                 Objects.equals(deptId, employee.deptId) &&
                 Objects.equals(relName, employee.relName) &&
                 Objects.equals(idCard, employee.idCard) &&
@@ -142,6 +142,8 @@ public class Employee implements Serializable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, companyId,deptId, relName, idCard, sex, adress, phone, status, createTime, companyCode);
+        return Objects.hash(id,
+//                companyId,
+                deptId, relName, idCard, sex, adress, phone, status, createTime, companyCode);
     }
 }

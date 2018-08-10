@@ -19,4 +19,5 @@ public interface DepartmentService {
     void delete(Integer id);
     
     void deletes(List<Integer> ids);
+    
 }

@@ -1,6 +1,8 @@
 package com.hxc.cms.service.message.impl;
 
 import com.hxc.cms.dao.MessageRepository;
+import com.hxc.cms.enums.MessageStatus;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.model.Message;
 import com.hxc.cms.param.PageParam;
 import com.hxc.cms.service.message.MessageService;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Service("messageService")
@@ -26,11 +29,13 @@ public class MessageServiceImpl implements MessageService {
                 .withIgnorePaths("id", "createTime")
                 // 忽略大小写。
                 .withIgnoreCase()
+                .withMatcher("relName", ExampleMatcher.GenericPropertyMatchers.startsWith()) //采用“开始匹配”的方式查询
+                .withMatcher("phone", ExampleMatcher.GenericPropertyMatchers.startsWith()) //采用“开始匹配”的方式查询
                 // 忽略为空字段。
                 .withIgnoreNullValues();
         // 携带 ExampleMatcher。
         example = Example.of(messageParam, exampleMatcher);
-        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows()); //页码：前端从1开始，jpa从0开始，做个转换
+        Pageable pageable = new PageRequest(pageParam.getPage()-1,pageParam.getRows(),Sort.Direction.DESC,"createTime"); //页码：前端从1开始，jpa从0开始，做个转换
         return this.messageRepository.findAll(example,pageable);
     }
     
@@ -52,7 +57,19 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public void save(Message message) {
-        this.messageRepository.save(message);
+        if(!ObjectUtil.isNotBlank(message.getId())){
+            if(!ObjectUtil.isNotBlank(message.getStatus())){
+                message.setStatus(MessageStatus.YKLY.getCode());
+            }
+            message.setCreateTime(new Date());
+            this.messageRepository.save(message);
+        }else{
+            Message _old = this.messageRepository.getOne(message.getId());
+            if(_old != null){
+                _old.setStatus(message.getStatus());
+                this.messageRepository.save(_old);
+            }
+        }
     }
 
     @Override
