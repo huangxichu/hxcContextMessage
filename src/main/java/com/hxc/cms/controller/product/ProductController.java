@@ -4,6 +4,8 @@ package com.hxc.cms.controller.product;
 import com.hxc.cms.annotation.CheckLogin;
 import com.hxc.cms.aspect.TokenAspect;
 import com.hxc.cms.dto.Result;
+import com.hxc.cms.enums.Mark;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.model.Product;
 import com.hxc.cms.model.UserInfo;
 import com.hxc.cms.param.PageParam;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -54,6 +57,21 @@ public class ProductController {
         productParam.setCompanyCode(user.getCompanyCode());
         PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
         Page<Product> products = productService.findProductsByPage(productParam,pageParam);
+        return ResultUtil.success(products);
+    }
+    
+    @GetMapping("/home/products")
+    public Result getHomeProducts(HttpServletRequest request,
+                                  @RequestParam(value = "companyCode",required = true) String companyCode,
+                                  @RequestParam(value = "page",required = true) Integer page,
+                                  @RequestParam(value = "rows",required = true) Integer rows){
+        Product productParam = new Product();
+        productParam.setCompanyCode(companyCode);
+        productParam.setStatus(Status.ENABLE.getCode());
+        productParam.setIsHot(Mark.YES.getCode());
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.HOME_ROWS));
+        Page<Product> productPage = productService.findProductsByPage(productParam,pageParam);
+        List<Product> products = productPage != null ? productPage.getContent() : new ArrayList<>();
         return ResultUtil.success(products);
     }
     

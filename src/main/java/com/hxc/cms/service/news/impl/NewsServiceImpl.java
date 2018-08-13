@@ -1,6 +1,7 @@
 package com.hxc.cms.service.news.impl;
 
 import com.hxc.cms.dao.NewsRepository;
+import com.hxc.cms.enums.Mark;
 import com.hxc.cms.enums.NewsStatus;
 import com.hxc.cms.model.News;
 import com.hxc.cms.param.PageParam;
@@ -60,6 +61,9 @@ public class NewsServiceImpl implements NewsService {
             if(!ObjectUtil.isNotBlank(news.getStatus())){
                 news.setStatus(NewsStatus.EDIT.getCode());
             }
+            if(!ObjectUtil.isNotBlank(news.getIsTop())){
+                news.setIsTop(Mark.NO.getCode());
+            }
             news.setCreateTime(new Date());
             news.setUpdateTime(new Date());
             this.newsRepository.save(news);
@@ -69,6 +73,9 @@ public class NewsServiceImpl implements NewsService {
                 _news.setTitle(news.getTitle());
                 _news.setSubTitle(news.getSubTitle());
                 _news.setIsOriginal(news.getIsOriginal());
+                _news.setIsTop(news.getIsTop());
+                _news.setPic(news.getPic());
+                _news.setIntroduction(news.getIntroduction());
                 _news.setContext(news.getContext());
                 _news.setSources(news.getSources());
                 _news.setStatus(news.getStatus());

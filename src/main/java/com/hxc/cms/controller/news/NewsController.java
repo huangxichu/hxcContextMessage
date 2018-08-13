@@ -4,6 +4,9 @@ package com.hxc.cms.controller.news;
 import com.hxc.cms.annotation.CheckLogin;
 import com.hxc.cms.aspect.TokenAspect;
 import com.hxc.cms.dto.Result;
+import com.hxc.cms.enums.Mark;
+import com.hxc.cms.enums.NewsStatus;
+import com.hxc.cms.enums.Status;
 import com.hxc.cms.model.News;
 import com.hxc.cms.model.UserInfo;
 import com.hxc.cms.param.PageParam;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -60,6 +64,33 @@ public class NewsController {
         PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.ROWS));
         Page<News> categories = newsService.findNewsByPage(newsParam,pageParam);
         return ResultUtil.success(categories);
+    }
+    
+    @GetMapping("/home/top/news")
+    public Result getHomeProducts(HttpServletRequest request,
+                                  @RequestParam(value = "companyCode",required = true) String companyCode){
+        News param = new News();
+        param.setCompanyCode(companyCode);
+        param.setStatus(NewsStatus.OPEN.getCode());
+        param.setIsTop(Mark.YES.getCode());
+        List<News> newses = this.newsService.findNews(param);
+        News news = ObjectUtil.isNotBlank(newses) ? newses.get(0) : null;
+        return ResultUtil.success(news);
+    }
+    
+    @GetMapping("/home/news")
+    public Result getHomeProducts(HttpServletRequest request,
+                                  @RequestParam(value = "companyCode",required = true) String companyCode,
+                                  @RequestParam(value = "page",required = true) Integer page,
+                                  @RequestParam(value = "rows",required = true) Integer rows){
+        News param = new News();
+        param.setCompanyCode(companyCode);
+        param.setStatus(NewsStatus.OPEN.getCode());
+        param.setIsTop(Mark.NO.getCode());
+        PageParam pageParam = new PageParam(ObjectUtil.numberFormat(page, Constant.PAGES),ObjectUtil.numberFormat(rows,Constant.HOME_NEWS_ROWS));
+        Page<News> productPage = newsService.findNewsByPage(param,pageParam);
+        List<News> products = productPage != null ? productPage.getContent() : new ArrayList<>();
+        return ResultUtil.success(products);
     }
     
     @CheckLogin

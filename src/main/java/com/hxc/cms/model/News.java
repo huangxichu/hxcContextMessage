@@ -21,6 +21,12 @@ public class News implements Serializable {
     private String context;
     @Column(name = "IS_ORIGINAL")
     private String isOriginal;
+    @Column(name = "IS_TOP")
+    private String isTop;
+    @Column(name = "PIC")
+    private String pic;
+    @Column(name = "INTRODUCTION")
+    private String introduction;
     @Column(name = "SOURCES")
     private String sources;
     @Column(name = "SOUR_URL")
@@ -81,7 +87,31 @@ public class News implements Serializable {
     public void setIsOriginal(String isOriginal) {
         this.isOriginal = isOriginal;
     }
-
+    
+    public String getIsTop() {
+        return isTop;
+    }
+    
+    public void setIsTop(String isTop) {
+        this.isTop = isTop;
+    }
+    
+    public String getPic() {
+        return pic;
+    }
+    
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
+    
+    public String getIntroduction() {
+        return introduction;
+    }
+    
+    public void setIntroduction(String introduction) {
+        this.introduction = introduction;
+    }
+    
     public String getSources() {
         return sources;
     }

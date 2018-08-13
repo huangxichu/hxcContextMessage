@@ -15,4 +15,7 @@ public class Constant {
     
     public static final Integer PAGES = 1;
     
+    public static final Integer HOME_ROWS = 8;
+    
+    public static final Integer HOME_NEWS_ROWS = 3;
 }
