@@ -78,6 +78,12 @@ public class MessageController {
         return ResultUtil.success(message);
     }
     
+    @PostMapping("/message/yk/save")
+    public Result saveYkMessage(HttpServletRequest request,Message message){
+        messageService.save(message);
+        return ResultUtil.success(message);
+    }
+    
     @CheckLogin
     @PutMapping("/message/update")
     public Result update(HttpServletRequest request,Message message){
